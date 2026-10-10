@@ -1,0 +1,102 @@
+\documentclass{article}
+
+% typesetting
+\usepackage[letterpaper, textwidth=5.5in, textheight=9.0in]{geometry}
+\usepackage{setspace}
+\setstretch{1.08}
+\renewcommand{\paragraph}[1]{\par\medskip\noindent\textbf{#1}~---}
+\frenchspacing\raggedbottom\sloppy\sloppypar
+
+% mathematics
+\usepackage{amsmath}
+\newcommand{\setof}[1]{\left\{{#1}\right\}}
+
+% collaboration
+\usepackage{xcolor}
+\newcommand{\hoggsay}[1]{{\textcolor{red}{Hogg say: {#1}}}}
+
+\title{\bfseries A fully self-supervised redshift pipeline}
+\author{Hogg for Chauhan}
+\date{2026 October}
+\begin{document}
+\maketitle
+
+\begin{abstract}\noindent
+    Most data-driven redshift-determination techniques require some labeled data or ground truth.
+    Here we build a fully data-driven redshift estimation system that requires precisely one---and only one---object
+    in the data sample to have a known or adopted redshift.
+    Everything else is learned from the properties of the data and the fundamental symmetry of the Doppler shift.
+    We apply this method to the \hoggsay{DRXX} quasar catalog from the \textsl{Sloan Digital Sky Survey}.
+    We find \hoggsay{what things?}
+\end{abstract}
+
+\section{Introduction}
+
+\section{Assumptions and choices}
+\paragraph{Data}
+We have $N$ quasar (or galaxy) spectra $y_i$ ($1\leq i\leq N$), each of which is an ordered list $\setof{y_{ij}}_{j=1}^M$ of $M$ calibrated pixel flux or intensity measurements $y_{ij}$ on a standard Solar System barycentric rest-frame (for our purposes the ``observed'' frame) log-wavelength grid.
+Each pixel $y_{ij}$ ($1\leq j\leq M$) of spectrum $y_i$, which corresponds to some observatory-frame log-wavelength $x_j \equiv \ln\lambda_j$, has an associated weight or uncertainty inverse variance $\sigma^{-2}_{ij}$.
+
+Importantly---and as is the case for \textsl{SDSS} and \textsl{DESI} spectra, for example---we will assume that the log-wavelength grid is uniform in log wavelength.
+That is, we will assume that, in these rectangular data, Doppler shifts, which are pure translations in $x$, are pure translations in the discretized log-wavelength grid.
+This is an overly strong assumption; there are good methods that don't assume this.
+However, since our data have this property, we are going to capitalize on it.
+
+Fundamentally we are going to assume that these data are ``correct'' in most relevant ways:
+They are correctly calibrated, they have been correctly extracted on a standardized observed-frame wavelength grid, and the uncertainty estimates are reasonable (for most pixels of most spectra).
+
+These data are rectangular, but we won't assume that they are complete:
+There might be missing or masked data, these measurements are simply given vanishing inverse uncertainty variances $\sigma^{-2}_{ij}$ such that they will have no weight in anything we do below.
+
+\paragraph{Doppler shift}
+The point of this project is to learn Doppler shifts.
+As mentioned above, the Doppler shift is a pure, rigid translation in log wavelength.
+That fact structures this whole project and makes the inference possible.
+Each quasar $i$ will be assigned a relative Doppler shift $\Delta_i$, 
+These are related to redshift $z_i$ by
+\begin{align}
+    \Delta_i = \ln (1 + z_i) ~.\label{eq:doppler}
+\end{align}
+
+\paragraph{Exactly one known redshift}
+In order for the Doppler shifts to be identifiable, overall, we need to know the true redshift $z_i$ for exactly one object $i=i_0$.
+We only need one, but we want to be very confident about that one object's redshift.
+
+\paragraph{Low-dimensional representation}
+Quasar spectra are remarkably diverse.
+That said, they still live in a low-dimensional space; they can't have arbitrary spectral shape.
+If they didn't live in some low-dimensional or compact space, no redshift determination would ever have been possible, by any method.
+Here we will assume something even stronger, which is that there is a \emph{linear} $K$-dimensional subspace in spectral space
+that gives a good representation for most quasars, or at least good enough for redshift determination.
+
+Another way to say it is that we will assume that the expectation for the spectrum of quasar $i$ can be expressed with only $K$
+amplitudes $a_{ik}$, such that
+\begin{align}
+    y_{ij} &= \sum_{k=1}^K a_{ik}\,g_k(x_j - \Delta_i) + s_{ij} ~,
+\end{align}
+where the $g_k(x)$ are rest-frame (model-frame) eigenspectra or basis functions,
+they are functions of log wavelength $x$,
+the $\Delta_i$ are the (relative) redshifts of the spectra $i$,
+and the $s_{ij}$ are residuals or noise or individual-pixel departures from this model.
+
+Because all spectra are on the same, uniform, observed-frame log-wavelength grid of points $x_j$,
+we are going to represent these rest-frame eigenspectra $g_k(x)$ also on a uniform, rest-frame log-wavelength grid with the same grid spacing as the data.
+That is, the only difference between the grid we use for the $g_k(x)$ and that used for the data is the starting and ending log wavelengths of that grid.
+We discuss interpolation below.
+
+\paragraph{Noise model}
+\hoggsay{We assume that the noise has the form for which RHMF is the correct algorithm. Maybe Hilder can write this paragraph?}
+
+\paragraph{No interpolation}
+\hoggsay{We might interpolate the model expectation, but we will never interpolate the data!}
+
+\paragraph{Initialization}
+We are about to do a big optimization.
+The optimization is easy at fixed Doppler shifts $\setof{\Delta_i}_{i=1}^N$.
+We need to initialize the Doppler shifts to get started.
+We will proceed by \hoggsay{HOW?}
+
+\paragraph{Implementation details:}
+\hoggsay{Rounds of redshift updates followed by RHMF updates.}
+
+\end{document}
